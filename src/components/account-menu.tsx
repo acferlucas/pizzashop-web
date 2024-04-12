@@ -1,4 +1,5 @@
 import { Building, ChevronDown, LogOut } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 import { Button } from './ui/button'
 import {
@@ -11,6 +12,7 @@ import {
 } from './ui/dropdown-menu'
 
 export function AccountMenu() {
+  const navigate = useNavigate()
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -34,7 +36,10 @@ export function AccountMenu() {
           <Building className="mr-2 h-4 w-4" />
           <span>Perfil da loja</span>
         </DropdownMenuItem>
-        <DropdownMenuItem className="text-rose-500 dark:text-rose-400">
+        <DropdownMenuItem
+          className="text-rose-500 dark:text-rose-400"
+          onClick={() => navigate('/sign-in')}
+        >
           <LogOut className="mr-2 h-4 w-4" />
           <span>Sair</span>
         </DropdownMenuItem>
