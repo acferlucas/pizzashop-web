@@ -6,3 +6,11 @@ export const api = axios.create({
   baseURL: config.VITE_API_URL,
   withCredentials: true,
 })
+
+if (config.VITE_ENABLE_API_DELAY) {
+  api.interceptors.request.use(async (conf) => {
+    await new Promise((resolve) => setTimeout(resolve, 2000))
+
+    return conf
+  })
+}
