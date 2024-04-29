@@ -1,5 +1,9 @@
+import { useQuery } from '@tanstack/react-query'
 import { Helmet } from 'react-helmet-async'
+import { useSearchParams } from 'react-router-dom'
+import { z } from 'zod'
 
+import { getOrders } from '@/api/get-orders'
 import { Pagination } from '@/components/Pagination'
 import {
   Table,
@@ -12,9 +16,26 @@ import {
 import { OrderTableFilter } from './order-table-filter'
 import { OrderTableRow } from './order-table-row'
 
-const examples = Array.from({ length: 10 })
-
 export function Orders() {
+  const [searchParams, setSearchParams] = useSearchParams()
+
+  const pageIndex = z.coerce
+    .number()
+    .transform((page) => page - 1)
+    .parse(searchParams.get('page') ?? '1')
+
+  const { data: result } = useQuery({
+    queryKey: ['orders', pageIndex],
+    queryFn: () => getOrders({ pageIndex }),
+  })
+
+  function handlePaginate(pageIndex: number) {
+    setSearchParams((prev) => {
+      prev.set('page', String(pageIndex + 1))
+      return prev
+    })
+  }
+
   return (
     <>
       <Helmet title="Pedidos" />
@@ -38,13 +59,21 @@ export function Orders() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {examples.map((_, i) => (
-                  <OrderTableRow key={i} />
-                ))}
+                {result &&
+                  result.orders.map((order) => {
+                    return <OrderTableRow key={order.orderId} order={order} />
+                  })}
               </TableBody>
             </Table>
           </div>
-          <Pagination pageIndex={0} totalCount={105} perPage={10} />
+          {result && (
+            <Pagination
+              onPageChange={handlePaginate}
+              pageIndex={pageIndex}
+              totalCount={result.meta.totalCount}
+              perPage={result.meta.perPage}
+            />
+          )}
         </div>
       </div>
     </>
